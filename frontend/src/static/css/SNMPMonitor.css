@@ -1,0 +1,217 @@
+/* 🌟 Общие стили */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #e0f7fa, #80deea);
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+/* 🏠 Основной контейнер */
+.snmp-monitor-container {
+  max-width: 1200px;
+  width: 100%;
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.snmp-monitor-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 📌 Разделение колонок */
+.snmp-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.snmp-left,
+.snmp-right {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+
+  .snmp-left,
+  .snmp-right {
+    width: 100%;
+  }
+}
+
+/* 🎯 Заголовок */
+.snmp-monitor-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 🔍 Поле ввода IP */
+.input-group {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  gap: 10px;
+  align-items: center;
+}
+
+.ip-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 14px;
+  border: 2px solid #007bff;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  text-align: center;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.ip-input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+  outline: none;
+}
+
+/* 📌 Кнопки IP и OID */
+.saved-ips,
+.oid-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+}
+
+.ip-btn,
+.oid-btn {
+  padding: 14px 22px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  border: 2px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+  width: 100%;
+  max-width: 250px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ip-btn:hover,
+.oid-btn:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.ip-btn.active {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.oid-btn.active {
+  background-color: #ff9800;
+  border-color: #ff9800;
+}
+
+/* 🖥️ Карточка данных SNMP */
+.sensor-card {
+  width: 100%;
+  padding: 25px;
+  background: linear-gradient(135deg, #222, #444);
+  color: white;
+  border-radius: 12px;
+  border: 2px solid #007bff;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sensor-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.sensor-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sensor-details li {
+  font-size: 18px;
+  margin: 8px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ⏳ Текст загрузки и ошибки */
+.loading-text {
+  color: #ff9800;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.error-text {
+  color: #ff4c4c;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.placeholder-text {
+  color: #bbb;
+  font-size: 18px;
+}
+
+/* Стили для выпадающих списков */
+select.ip-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 14px;
+  border: 2px solid #007bff;
+  border-radius: 10px;
+  font-size: 16px;
+  background-color: #f9f9f9;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+select.ip-input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+  outline: none;
+}

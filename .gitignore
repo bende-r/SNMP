@@ -1,0 +1,18 @@
+# Node.js (Frontend)
+node_modules/
+dist/
+.vite/
+.env
+package-lock.json
+
+# Python (Backend)
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+*.sqlite3
+
+# OS Files
+.DS_Store
+Thumbs.db
