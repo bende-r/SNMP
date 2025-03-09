@@ -2,29 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../static/css/SNMPMonitor.css";
 
-const DEFAULT_OID_OPTIONS = [
-  { name: "Used Memory", oid: "1.3.6.1.2.1.25.2.3.1.6.1" },
-  { name: "Total Memory", oid: "1.3.6.1.2.1.25.2.2.0" },
-  { name: "Network Interfaces Count", oid: "1.3.6.1.2.1.2.1.0" },
-  { name: "Inbound Traffic", oid: "1.3.6.1.2.1.2.2.1.10.1" },
-  { name: "Outbound Traffic", oid: "1.3.6.1.2.1.2.2.1.16.1" },
-  { name: "Power Status", oid: "1.3.6.1.4.1.19046.11.1.5.1.1.0" },
-  { name: "System Uptime (hours)", oid: "1.3.6.1.4.1.19046.11.1.5.1.2.0" },
-  { name: "System Reboot Count", oid: "1.3.6.1.4.1.19046.11.1.5.1.3.0" },
-  { name: "Overall System Status", oid: "1.3.6.1.4.1.19046.11.1.5.1.4.0" },
-  { name: "Power Consumption (W)", oid: "1.3.6.1.4.1.19046.11.1.1.10.1.10.0" },
-  { name: "Temperature (°C)", oid: "1.3.6.1.4.1.19046.11.1.1.1.2.1.3.1" },
-  { name: "Fan Speed (%)", oid: "1.3.6.1.4.1.19046.11.1.1.3.2.1.3.1" },
-  { name: "Fan Status", oid: "1.3.6.1.4.1.19046.11.1.1.3.2.1.10.1" },
-  { name: "Memory Module Status", oid: "1.3.6.1.4.1.19046.11.1.1.5.21.1.8.1" },
-  { name: "Physical Disk Status", oid: "1.3.6.1.4.1.19046.11.1.1.12.2.1.3.1" },
-  {
-    name: "RAID Controller Battery Status",
-    oid: "1.3.6.1.4.1.19046.11.1.1.13.1.2.1.24.1",
-  },
-  { name: "RAID Volume Status", oid: "1.3.6.1.4.1.19046.11.1.1.13.1.7.1.4.1" },
-  { name: "Power Supply Status", oid: "1.3.6.1.4.1.19046.11.1.1.11.2.1.6.1" },
-];
+type OIDOption = {
+  name: string;
+  oid: string;
+};
 
 type SNMPData = {
   oid: string;
@@ -34,14 +15,28 @@ type SNMPData = {
 const SNMPMonitor = () => {
   const [ip, setIp] = useState("");
   const [savedIps, setSavedIps] = useState<string[]>([]);
-  const [oidOptions, setOidOptions] = useState(DEFAULT_OID_OPTIONS);
-  const [selectedOid, setSelectedOid] = useState(DEFAULT_OID_OPTIONS[0].oid);
+  const [oidOptions, setOidOptions] = useState<OIDOption[]>([]);
+  const [selectedOid, setSelectedOid] = useState("");
   const [data, setData] = useState<SNMPData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [newIp, setNewIp] = useState("");
   const [newOidName, setNewOidName] = useState("");
   const [newOid, setNewOid] = useState("");
+  const [showDeletePanel, setShowDeletePanel] = useState(false);
+
+  // Валидация IP-адреса
+  const isValidIP = (ip: string): boolean => {
+    const ipPattern =
+      /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipPattern.test(ip);
+  };
+
+  // Валидация OID
+  const isValidOID = (oid: string): boolean => {
+    const oidPattern = /^\.?(\d+\.)*\d+$/;
+    return oidPattern.test(oid);
+  };
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
@@ -53,7 +48,10 @@ const SNMPMonitor = () => {
     try {
       const response = await axios.get("http://localhost:8000/data");
       setSavedIps(response.data.ips);
-      setOidOptions([...DEFAULT_OID_OPTIONS, ...response.data.oids]);
+      setOidOptions(response.data.oids);
+      if (response.data.oids.length > 0) {
+        setSelectedOid(response.data.oids[0].oid);
+      }
     } catch (err) {
       console.error("Ошибка при загрузке данных:", err);
     }
@@ -61,31 +59,73 @@ const SNMPMonitor = () => {
 
   // Добавление IP
   const addIp = async () => {
-    if (newIp) {
-      try {
-        await axios.post("http://localhost:8000/add-ip", { ip: newIp });
-        setNewIp("");
-        fetchSavedData(); // Обновляем данные
-      } catch (err) {
-        console.error("Ошибка при добавлении IP:", err);
-      }
+    if (!newIp) {
+      setError("Поле IP не может быть пустым");
+      return;
+    }
+
+    if (!isValidIP(newIp)) {
+      setError("Неверный формат IP-адреса");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:8000/add-ip", { ip: newIp });
+      setNewIp("");
+      setError(null);
+      fetchSavedData();
+    } catch (err) {
+      console.error("Ошибка при добавлении IP:", err);
+      setError("Ошибка при добавлении IP");
+    }
+  };
+
+  // Удаление IP
+  const removeIp = async (ipToRemove: string) => {
+    try {
+      await axios.post("http://localhost:8000/remove-ip", { ip: ipToRemove });
+      fetchSavedData();
+    } catch (err) {
+      console.error("Ошибка при удалении IP:", err);
     }
   };
 
   // Добавление OID
   const addOid = async () => {
-    if (newOidName && newOid) {
-      try {
-        await axios.post("http://localhost:8000/add-oid", {
-          name: newOidName,
-          oid: newOid,
-        });
-        setNewOidName("");
-        setNewOid("");
-        fetchSavedData(); // Обновляем данные
-      } catch (err) {
-        console.error("Ошибка при добавлении OID:", err);
-      }
+    if (!newOidName || !newOid) {
+      setError("Поля имени и OID не могут быть пустыми");
+      return;
+    }
+
+    if (!isValidOID(newOid)) {
+      setError("Неверный формат OID");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:8000/add-oid", {
+        name: newOidName,
+        oid: newOid,
+      });
+      setNewOidName("");
+      setNewOid("");
+      setError(null);
+      fetchSavedData();
+    } catch (err) {
+      console.error("Ошибка при добавлении OID:", err);
+      setError("Ошибка при добавлении OID");
+    }
+  };
+
+  // Удаление OID
+  const removeOid = async (oidToRemove: string) => {
+    try {
+      await axios.post("http://localhost:8000/remove-oid", {
+        oid: oidToRemove,
+      });
+      fetchSavedData();
+    } catch (err) {
+      console.error("Ошибка при удалении OID:", err);
     }
   };
 
@@ -111,6 +151,7 @@ const SNMPMonitor = () => {
   return (
     <div className="snmp-monitor-container">
       <h2 className="snmp-monitor-title">SNMP Мониторинг</h2>
+      {error && <div className="error-text">{error}</div>}
       <div className="snmp-columns">
         <div className="snmp-left">
           <div className="input-group">
@@ -175,6 +216,13 @@ const SNMPMonitor = () => {
               Добавить OID
             </button>
           </div>
+
+          <button
+            onClick={() => setShowDeletePanel(!showDeletePanel)}
+            className="delete-panel-toggle"
+          >
+            {showDeletePanel ? "Скрыть удаление" : "Управление элементами"}
+          </button>
         </div>
         <div className="snmp-right">
           {loading ? (
@@ -198,6 +246,36 @@ const SNMPMonitor = () => {
           )}
         </div>
       </div>
+      {showDeletePanel && (
+        <div className="delete-panel">
+          <h3>Управление элементами</h3>
+          <div className="delete-section">
+            <h4>Сохраненные IP</h4>
+            {savedIps.map((savedIp) => (
+              <div key={savedIp} className="ip-item">
+                <span>{savedIp}</span>
+                <button
+                  onClick={() => removeIp(savedIp)}
+                  className="remove-btn"
+                >
+                  Удалить
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="delete-section">
+            <h4>Сохраненные OID</h4>
+            {oidOptions.map(({ name, oid }) => (
+              <div key={oid} className="oid-item">
+                <span>{name}</span>
+                <button onClick={() => removeOid(oid)} className="remove-btn">
+                  Удалить
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

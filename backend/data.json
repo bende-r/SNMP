@@ -1,13 +1,88 @@
 {
     "ips": [
-        "127.0.0.1",
-        "123.3.3.3",
-        "76543"
+        "192.168.3.3",
+        "127.0.0.1"
     ],
     "oids": [
         {
-            "name": "qwerty",
-            "oid": "123"
+            "name": "Used Memory",
+            "oid": "1.3.6.1.2.1.25.2.3.1.6.1"
+        },
+        {
+            "name": "Total Memory",
+            "oid": "1.3.6.1.2.1.25.2.2.0"
+        },
+        {
+            "name": "Network Interfaces Count",
+            "oid": "1.3.6.1.2.1.2.1.0"
+        },
+        {
+            "name": "Inbound Traffic",
+            "oid": "1.3.6.1.2.1.2.2.1.10.1"
+        },
+        {
+            "name": "Outbound Traffic",
+            "oid": "1.3.6.1.2.1.2.2.1.16.1"
+        },
+        {
+            "name": "Power Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.5.1.1.0"
+        },
+        {
+            "name": "System Uptime (hours)",
+            "oid": "1.3.6.1.4.1.19046.11.1.5.1.2.0"
+        },
+        {
+            "name": "System Reboot Count",
+            "oid": "1.3.6.1.4.1.19046.11.1.5.1.3.0"
+        },
+        {
+            "name": "Overall System Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.5.1.4.0"
+        },
+        {
+            "name": "Power Consumption (W)",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.10.1.10.0"
+        },
+        {
+            "name": "Temperature (\u0412\u00b0C)",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.1.2.1.3.1"
+        },
+        {
+            "name": "Fan Speed (%)",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.3.2.1.3.1"
+        },
+        {
+            "name": "Fan Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.3.2.1.10.1"
+        },
+        {
+            "name": "Memory Module Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.5.21.1.8.1"
+        },
+        {
+            "name": "Physical Disk Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.12.2.1.3.1"
+        },
+        {
+            "name": "RAID Controller Battery Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.13.1.2.1.24.1"
+        },
+        {
+            "name": "RAID Volume Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.13.1.7.1.4.1"
+        },
+        {
+            "name": "Power Supply Status",
+            "oid": "1.3.6.1.4.1.19046.11.1.1.11.2.1.6.1"
+        },
+        {
+            "name": "system info",
+            "oid": "1.3.6.1.2.1.1"
+        },
+        {
+            "name": "sys",
+            "oid": "1.3.6.1.2.1.1.1.0"
         }
     ]
 }

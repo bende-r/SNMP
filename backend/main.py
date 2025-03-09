@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
 import os
-from typing import List, Dict
+import logging
+from pysnmp.hlapi import *
 
 app = FastAPI()
 
@@ -19,24 +20,24 @@ app.add_middleware(
 # Путь к файлу данных
 DATA_FILE = "data.json"
 
-# Модель для добавления OID
-class OIDModel(BaseModel):
-    name: str
-    oid: str
-
 # Модель для добавления IP
 class IPModel(BaseModel):
     ip: str
 
+# Модель для удаления OID
+class OIDModel(BaseModel):
+    name: str
+    oid: str
+
 # Загрузка данных из файла
-def load_data() -> Dict:
+def load_data() -> dict:
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as file:
             return json.load(file)
     return {"ips": [], "oids": []}
 
 # Сохранение данных в файл
-def save_data(data: Dict):
+def save_data(data: dict):
     with open(DATA_FILE, "w") as file:
         json.dump(data, file, indent=4)
 
@@ -45,7 +46,7 @@ def save_data(data: Dict):
 async def get_data():
     return load_data()
 
-# Эндпоинт для добавления IP
+# Добавить IP
 @app.post("/add-ip")
 async def add_ip(ip_data: IPModel):
     data = load_data()
@@ -53,7 +54,16 @@ async def add_ip(ip_data: IPModel):
         data["ips"].append(ip_data.ip)
         save_data(data)
     return {"message": "IP добавлен", "data": data}
-    
+
+# Удалить IP
+@app.post("/remove-ip")
+async def remove_ip(ip_data: IPModel):
+    data = load_data()
+    if ip_data.ip in data["ips"]:
+        data["ips"].remove(ip_data.ip)
+        save_data(data)
+    return {"message": "IP удален", "data": data}
+
 # Добавить OID
 @app.post("/add-oid")
 async def add_oid(oid: OIDModel):
@@ -61,6 +71,16 @@ async def add_oid(oid: OIDModel):
     data["oids"].append({"name": oid.name, "oid": oid.oid})
     save_data(data)
     return {"message": "OID добавлен", "data": data}
+
+# Удалить OID
+@app.post("/remove-oid")
+async def remove_oid(oid_data: OIDModel):
+    logging.debug(f"Received OID to remove: {oid_data}")
+    data = load_data()
+    logging.debug(f"Current data: {data}")
+    data["oids"] = [oid for oid in data["oids"] if oid["oid"] != oid_data.oid]
+    save_data(data)
+    return {"message": "OID удален", "data": data}
 
 # Получить данные SNMP
 @app.get("/snmp/")
@@ -90,14 +110,6 @@ def snmp_get(ip: str, oid: str, community: str = "public"):
             return {"error": str(errorStatus)}
         else:
             raw_value = varBinds[0][1].prettyPrint()  # Преобразуем в строку
-            
-            # Проверка, является ли ответ Hex-STRING
-            hex_match = re.match(r'\\x([0-9A-Fa-f]{2})', raw_value)
-            if hex_match:
-                # Преобразуем Hex-STRING в число
-                decoded_value = int.from_bytes(bytes(raw_value, "latin1"), byteorder="big")
-                return {"oid": oid, "value": decoded_value, "raw": raw_value}
-
             return {"oid": oid, "value": raw_value}
 
     except Exception as e:
